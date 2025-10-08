@@ -1,0 +1,29 @@
+# Matter LED Controller
+
+## The problem
+
+I bought a [Shelly Plus RGBW PM](https://www.amazon.co.uk/dp/B0CXN2B9RS) device to power four LED strips in my rennovated home office. The LED strips are [Mini Warm White Neon Flex 3000K 12V 6x12mm 120LEDs/m](https://www.ukledlights.co.uk/products/led-neon-flex-warm-white-dc-12v-120leds-m-ip65-waterproof-6x12mm) ones and I absolutely love them.
+
+The problem is the in-built Shelly firmware supports dimming of the LED strips individually, but isn't Matter compatible. That's a problem for me, I'm fully in the Apple ecosystem so I need the strips to be controllable via Apple Home. Using a cheap Matter-compatible smart plug I couldn't turn them on or off, but then I'd have to use the Shelly Web UI to control dimming after they were turned on.
+
+My office doubles as a home automation playground, so I use an Aqara FP2 presence sensor to turn all the lights on automatically. I'd like to be able to have different brightnesses for all lights during the day and the evening. So this was a non-starter.
+
+My next step was to install custom firmare [Shelly-HomeKit](https://github.com/mongoose-os-apps/shelly-homekit). This allows control for each strip individually over Matter/HomeKit, but not dimming.
+
+So there has to be a better way. As a geek, with a GCSE (secondary school level) certificate in Electronics from 35 years ago... "How hard can it be?" - which lead me to ESP32 dev boards, HomeSpan and other fun topics.
+
+## The electrical design
+
+The circuit design is as below, I'll give some explanation afterwards because I'm not an expert and only recently started re-learning this stuff...
+
+![Schematic V1](doc/schematic-v1.png)
+
+I'm using 12V light strips with a 12V power source. There are multiple +12V points on the schematic to keep the design simple without crossing over wires. The power is fed in to a [BUNTOR  DC-DC Buck Converter](https://www.amazon.co.uk/dp/B0F5W7C4KX) to convert this down to the ideal 3.3V that the ESP32 requires. The 12V supply is also connected to the LED strip, which is represented by a single LED with a comment on the schematic (I couldn't find a better way to show it).
+
+The LED strip is connected to an IRLZ34N MOSFET which will use the 3.3V signal from a GPIO pin from the ESP32 to allow current to flow through to GND.
+
+There is a 10kΩ pull-down resister added from ground to the Gate of the MOSFET to ensure that static doesn't allow current to flow through the MOSFET. There's also a 330Ω resister connected between the GPIO pin and the MOSFET to ensure that it doesn't accidentally trigger the Gate.
+
+The setup of LED strip, MOSFET and resistors connected through to GPIO0 will be repeated to GPIO1-3 for the other strips.
+
+## Software design
