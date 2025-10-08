@@ -1,0 +1,12 @@
+---
+# Configuration for clang-format
+# This keeps opening braces on the same line as function definitions
+BasedOnStyle: LLVM
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 100

@@ -1,0 +1,10 @@
+{
+  "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, BreakBeforeBraces: Attach, AllowShortFunctionsOnASingleLine: All, IndentWidth: 2, TabWidth: 2, UseTab: Never, ColumnLimit: 100 }",
+  "C_Cpp.clang_format_fallbackStyle": "LLVM",
+  "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "[c]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  }
+}
