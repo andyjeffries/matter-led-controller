@@ -26,6 +26,38 @@ There is a 10kΩ pull-down resister added from ground to the Gate of the MOSFET 
 
 The setup of LED strip, MOSFET and resistors are connected through to GPIO0 as an example, but will actually be repeated and connected to GPIO1-3 for the other strips.
 
+## Development
+
+This project uses [PlatformIO](https://platformio.org/) via the CLI. Install it if you haven't already:
+
+```sh
+brew install platformio
+```
+
+Or via pip:
+
+```sh
+pip install platformio
+```
+
+A `Makefile` wraps common commands:
+
+| Command | Description |
+|---------|-------------|
+| `make` | Build the project |
+| `make upload` | Flash firmware to the ESP32 |
+| `make monitor` | Open serial monitor (115200 baud) |
+| `make flash` | Upload + open serial monitor in one step |
+| `make clean` | Remove build artifacts |
+| `make format` | Format source code with clang-format |
+| `make devices` | List connected serial devices |
+
+If PlatformIO doesn't auto-detect the right port, override it:
+
+```sh
+make flash PORT=/dev/cu.usbserial-XXX
+```
+
 ## Software design
 
 [HomeSpan](https://github.com/HomeSpan/HomeSpan) is an open-source framework that lets ESP32 devices act as native Apple HomeKit accessories — no bridges or extra apps required. It implements Apple’s HAP (HomeKit Accessory Protocol) over Wi-Fi and optionally Bluetooth, exposing your device directly to the Apple Home app.
