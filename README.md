@@ -16,15 +16,25 @@ So there has to be a better way. As a geek, with a GCSE (secondary school level)
 
 The circuit design is as below, I'll give some explanation afterwards because I'm not an expert and only recently started re-learning this stuff...
 
-![Schematic V1](doc/schematic-v1.png)
+![Schematic v2](doc/schematic-v2.svg)
 
-I'm using 12V light strips with a 12V power source. There are multiple +12V points on the schematic to keep the design simple without crossing over wires. The power is fed in to a [BUNTOR  DC-DC Buck Converter](https://www.amazon.co.uk/dp/B0F5W7C4KX) to convert this down to the ideal 3.3V that the ESP32 requires. The 12V supply is also connected to the LED strip, which is represented by a single LED with a comment on the schematic (I couldn't find a better way to show it).
+[View full screen ↗](https://raw.githubusercontent.com/andyjeffries/matter-led-controller/master/doc/schematic-v2.svg)
 
-The LED strip is connected to an IRLZ34N MOSFET (Logic-level N-channel, supports PWM for dimming) which will use the 3.3V signal from a GPIO pin from the ESP32 to allow current to flow through to GND.
+I'm using 12V light strips with a 12V power source. There are multiple +12V points on the schematic to keep the design simple without crossing over wires. The power is fed in to a [BUNTOR  DC-DC Buck Converter](https://www.amazon.co.uk/dp/B0F5W7C4KX) to convert this down to the ideal 3.3V that the ESP32 requires. The 12V supply is also connected to the LED strip anode; the LED strip cathode connects to the Drain of an MOSFET, with its Source connected to GND.
 
-There is a 10kΩ pull-down resister added from ground to the Gate of the MOSFET to ensure that static doesn't allow current to flow through the MOSFET. There's also a 330Ω resister connected between the GPIO pin and the MOSFET to ensure that it doesn't accidentally trigger the Gate.
+The LED strip is switched on/off (and dimmed via PWM) by an IRLZ34N MOSFET (Logic-level N-channel, supports PWM for dimming) which uses the 3.3V signal from a GPIO pin on the ESP32 to allow current to flow through to GND.
 
-The setup of LED strip, MOSFET and resistors are connected through to GPIO0 as an example, but will actually be repeated and connected to GPIO1-3 for the other strips.
+There is a 10kΩ pull-down resistor added from ground to the Gate of the MOSFET to ensure that static doesn't allow current to flow through the MOSFET, and to keep the gate held low while the ESP32 is booting (so the LEDs don't flash on at power-up). There's also a 330Ω resistor connected between the GPIO pin and the Gate of the MOSFET to limit the inrush current into the gate capacitance during switching.
+
+The schematic shows all four channels explicitly, wired to GPIO25, GPIO27, GPIO18 and GPIO19 respectively (these are non-strapping pins on the ESP32-WROOM-32 and match the pins in [`src/main.cpp`](src/main.cpp)).
+
+### Board layout
+
+Here is a top-down view of how the components sit on a piece of perfboard, with each colour indicating a wire to solder on the underside of the board:
+
+![Board layout](doc/board-layout-v1.svg)
+
+[View full screen ↗](https://raw.githubusercontent.com/andyjeffries/matter-led-controller/master/doc/board-layout-v1.svg)
 
 ## Development
 

@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1240" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <style>
+    .wire    { stroke: #1a1a1a; stroke-width: 2; fill: none; }
+    .pwr12   { stroke: #c0392b; stroke-width: 2.5; fill: none; }
+    .pwr3v3  { stroke: #d35400; stroke-width: 2.5; fill: none; }
+    .gnd     { stroke: #2c3e50; stroke-width: 2.5; fill: none; }
+    .sig     { stroke: #2874a6; stroke-width: 2; fill: none; }
+    .dot     { fill: #1a1a1a; }
+    .label   { font-size: 14px; fill: #1a1a1a; }
+    .small   { font-size: 11px; fill: #555; }
+    .title   { font-size: 22px; font-weight: 700; fill: #1a1a1a; }
+    .sub     { font-size: 13px; fill: #555; }
+    .pwrlbl  { font-size: 13px; font-weight: 700; fill: #c0392b; }
+    .pwrlbl3 { font-size: 13px; font-weight: 700; fill: #d35400; }
+    .gndlbl  { font-size: 13px; font-weight: 700; fill: #2c3e50; }
+    .siglbl  { font-size: 11px; font-weight: 700; fill: #2874a6; }
+    .comp    { fill: #fdf6e3; stroke: #1a1a1a; stroke-width: 1.5; }
+    .modu    { fill: #fff8dc; stroke: #1a1a1a; stroke-width: 2; }
+    .pin     { font-size: 11px; fill: #1a1a1a; }
+    .vlabel  { font-size: 12px; fill: #1a1a1a; font-style: italic; }
+    .chlabel { font-size: 16px; font-weight: 700; fill: #1a1a1a; }
+  </style>
+
+  <defs>
+    <!-- N-channel MOSFET. Origin = gate pin endpoint. Drain pin at (60, -30). Source pin at (60, 30). Body center at (40, 0). -->
+    <symbol id="nmos" overflow="visible">
+      <circle cx="40" cy="0" r="24" fill="#fff" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="0"  y1="0"   x2="20" y2="0"   stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="22" y1="-16" x2="22" y2="16"  stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="28" y1="-18" x2="28" y2="-10" stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="28" y1="-4"  x2="28" y2="4"   stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="28" y1="10"  x2="28" y2="18"  stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="28" y1="-18" x2="60" y2="-18" stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="60" y1="-18" x2="60" y2="-30" stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="28" y1="18"  x2="60" y2="18"  stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="60" y1="18"  x2="60" y2="30"  stroke="#1a1a1a" stroke-width="2"/>
+      <polygon points="36,-3 36,3 28,0" fill="#1a1a1a"/>
+      <text x="6"  y="-6" font-size="11" fill="#1a1a1a">G</text>
+      <text x="65" y="-22" font-size="11" fill="#1a1a1a">D</text>
+      <text x="65" y="28"  font-size="11" fill="#1a1a1a">S</text>
+    </symbol>
+
+    <!-- LED strip (160 wide x 60 tall). Anode at (10, 30). Cathode at (150, 30). -->
+    <symbol id="ledstrip" overflow="visible">
+      <rect x="0" y="0" width="160" height="60" fill="#fff8e1" stroke="#1a1a1a" stroke-width="1.5"/>
+      <polygon points="80,15 95,30 80,45" fill="#fff" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="95" y1="15" x2="95" y2="45" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="100" y1="20" x2="110" y2="10" stroke="#1a1a1a" stroke-width="1"/>
+      <polygon points="108,8 113,7 110,12" fill="#1a1a1a"/>
+      <line x1="106" y1="24" x2="116" y2="14" stroke="#1a1a1a" stroke-width="1"/>
+      <polygon points="114,12 119,11 116,16" fill="#1a1a1a"/>
+      <line x1="10" y1="30" x2="80" y2="30" stroke="#1a1a1a" stroke-width="2"/>
+      <line x1="95" y1="30" x2="150" y2="30" stroke="#1a1a1a" stroke-width="2"/>
+      <text x="14"  y="55" font-size="10" fill="#555">+ (anode)</text>
+      <text x="146" y="55" font-size="10" fill="#555" text-anchor="end">− (cathode)</text>
+    </symbol>
+
+    <symbol id="rh" overflow="visible">
+      <rect x="0" y="-8" width="50" height="16" fill="#fff" stroke="#1a1a1a" stroke-width="1.5"/>
+    </symbol>
+
+    <symbol id="rv" overflow="visible">
+      <rect x="-8" y="0" width="16" height="50" fill="#fff" stroke="#1a1a1a" stroke-width="1.5"/>
+    </symbol>
+  </defs>
+
+  <!-- Title -->
+  <text x="750" y="36" class="title" text-anchor="middle">Matter LED Controller — Schematic v2</text>
+  <text x="750" y="58" class="sub" text-anchor="middle">4-channel 12V LED strip dimmer (PWM low-side switching) with ESP32-WROOM-32 + HomeSpan</text>
+
+  <!-- ============================================================ -->
+  <!-- POWER SECTION (top): horizontal flow, separate Ys for +12V and GND -->
+  <!-- ============================================================ -->
+
+  <!-- 12V DC input. Pins on the right side. -->
+  <g transform="translate(80, 110)">
+    <rect x="0" y="0" width="120" height="80" class="comp"/>
+    <text x="60" y="22" class="label" text-anchor="middle" font-weight="700">12V DC IN</text>
+    <text x="60" y="40" class="small" text-anchor="middle">screw terminal</text>
+    <text x="60" y="58" class="small" text-anchor="middle">e.g. 5A PSU</text>
+    <!-- Pin stubs to the right -->
+    <line x1="120" y1="20" x2="140" y2="20" class="pwr12"/>
+    <text x="124" y="14" class="pwrlbl">+12V</text>
+    <line x1="120" y1="60" x2="140" y2="60" class="gnd"/>
+    <text x="124" y="78" class="gndlbl">GND</text>
+  </g>
+  <!-- After translation, pin endpoints are (220, 130) for +12V and (220, 170) for GND -->
+
+  <!-- Buck converter. Inputs on left, outputs on right, both at y=130 (power) and y=170 (gnd). -->
+  <g transform="translate(280, 100)">
+    <rect x="0" y="0" width="220" height="100" class="comp"/>
+    <text x="110" y="24" class="label" text-anchor="middle" font-weight="700">Buck Converter</text>
+    <text x="110" y="42" class="small" text-anchor="middle">BUNTOR DC-DC</text>
+    <text x="110" y="58" class="small" text-anchor="middle">set to 3.3V via on-board pot</text>
+    <text x="110" y="74" class="small" text-anchor="middle">before connecting to ESP32</text>
+    <!-- Input pins on the left -->
+    <line x1="-20" y1="30" x2="0" y2="30" class="pwr12"/>
+    <text x="4" y="34" class="pin">VIN</text>
+    <line x1="-20" y1="70" x2="0" y2="70" class="gnd"/>
+    <text x="4" y="74" class="pin">GND</text>
+    <!-- Output pins on the right -->
+    <line x1="220" y1="30" x2="240" y2="30" class="pwr3v3"/>
+    <text x="216" y="34" class="pin" text-anchor="end">VOUT</text>
+    <line x1="220" y1="70" x2="240" y2="70" class="gnd"/>
+    <text x="216" y="74" class="pin" text-anchor="end">GND</text>
+  </g>
+  <!-- After translation: VIN @ (280, 130), GND_in @ (280, 170), VOUT @ (520, 130), GND_out @ (520, 170) -->
+
+  <!-- +12V from input → buck VIN (direct horizontal at y=130) -->
+  <line x1="220" y1="130" x2="280" y2="130" class="pwr12"/>
+  <!-- Tap junction for +12V rail going down -->
+  <circle cx="250" cy="130" r="3.5" class="dot"/>
+  <line x1="250" y1="130" x2="250" y2="400" class="pwr12"/>
+
+  <!-- GND from input → buck GND (direct horizontal at y=170) -->
+  <line x1="220" y1="170" x2="280" y2="170" class="gnd"/>
+
+  <!-- +3.3V from buck VOUT → ESP32 3V3 (direct horizontal at y=130 from 520 to 900) -->
+  <line x1="520" y1="130" x2="900" y2="130" class="pwr3v3"/>
+  <text x="710" y="122" class="pwrlbl3" text-anchor="middle">+3.3V</text>
+
+  <!-- GND from buck output → ESP32 GND (direct horizontal at y=170 from 520 to 900) -->
+  <line x1="520" y1="170" x2="900" y2="170" class="gnd"/>
+  <!-- Tap junction for GND rail going down -->
+  <circle cx="700" cy="170" r="3.5" class="dot"/>
+  <line x1="700" y1="170" x2="700" y2="1080" class="gnd"/>
+
+  <!-- ============================================================ -->
+  <!-- ESP32 MODULE                                                 -->
+  <!-- ============================================================ -->
+  <g transform="translate(900, 80)">
+    <rect x="0" y="0" width="420" height="300" class="modu"/>
+    <text x="210" y="26" class="label" text-anchor="middle" font-weight="700">ESP32-WROOM-32 DevKit (30-pin)</text>
+    <text x="210" y="46" class="small" text-anchor="middle">USB-side at top — only pins used in the project shown</text>
+
+    <!-- Left edge: 3V3 at y=50 → relative (0,50), absolute (900, 130). GND at y=90, absolute (900, 170) -->
+    <line x1="0" y1="50" x2="-20" y2="50" class="pwr3v3"/>
+    <text x="6" y="54" class="pin">3V3</text>
+    <line x1="0" y1="90" x2="-20" y2="90" class="gnd"/>
+    <text x="6" y="94" class="pin">GND</text>
+
+    <!-- Bottom edge: 4 GPIO pins, stubs going down -->
+    <line x1="80"  y1="300" x2="80"  y2="320" class="wire"/>
+    <text x="80"  y="290" class="pin" text-anchor="middle">GPIO25</text>
+    <line x1="180" y1="300" x2="180" y2="320" class="wire"/>
+    <text x="180" y="290" class="pin" text-anchor="middle">GPIO27</text>
+    <line x1="260" y1="300" x2="260" y2="320" class="wire"/>
+    <text x="260" y="290" class="pin" text-anchor="middle">GPIO18</text>
+    <line x1="360" y1="300" x2="360" y2="320" class="wire"/>
+    <text x="360" y="290" class="pin" text-anchor="middle">GPIO19</text>
+  </g>
+  <!-- ESP32 pin endpoints (after stubs): 3V3 @ (880, 130). GND @ (880, 170). GPIOs @ (980/1080/1160/1260, 400). -->
+
+  <!-- ============================================================ -->
+  <!-- +12V RAIL and GND RAIL                                       -->
+  <!-- ============================================================ -->
+
+  <!-- +12V rail horizontal at y=420 (LOWERED to be clear of the GPIO labels at the bottom of the ESP32) -->
+  <line x1="80" y1="420" x2="1420" y2="420" class="pwr12"/>
+  <line x1="250" y1="420" x2="250" y2="420" class="pwr12"/>
+  <line x1="250" y1="400" x2="250" y2="420" class="pwr12"/>
+  <circle cx="250" cy="420" r="3.5" class="dot"/>
+  <text x="900" y="412" class="pwrlbl" text-anchor="middle">+12V rail (to all LED strip anodes)</text>
+
+  <!-- GND rail horizontal at y=1080 -->
+  <line x1="80" y1="1080" x2="1420" y2="1080" class="gnd"/>
+  <circle cx="700" cy="1080" r="3.5" class="dot"/>
+  <text x="80" y="1102" class="gndlbl">GND rail (common: 12V supply, buck output, ESP32, MOSFET sources, pull-downs)</text>
+  <g transform="translate(720, 1100)">
+    <line x1="0" y1="0"  x2="0"  y2="10" class="gnd"/>
+    <line x1="-12" y1="10" x2="12" y2="10" class="gnd"/>
+    <line x1="-8"  y1="14" x2="8"  y2="14" class="gnd"/>
+    <line x1="-4"  y1="18" x2="4"  y2="18" class="gnd"/>
+  </g>
+
+  <!-- Legend (moved to bottom-right where there's empty space) -->
+  <g transform="translate(1240, 1130)">
+    <rect x="0" y="0" width="220" height="92" fill="#fafafa" stroke="#ccc"/>
+    <text x="10" y="18" class="small" font-weight="700">Legend</text>
+    <line x1="10" y1="32" x2="40" y2="32" class="pwr12"/>
+    <text x="46" y="36" class="small">+12V power</text>
+    <line x1="10" y1="48" x2="40" y2="48" class="pwr3v3"/>
+    <text x="46" y="52" class="small">+3.3V power</text>
+    <line x1="10" y1="64" x2="40" y2="64" class="gnd"/>
+    <text x="46" y="68" class="small">GND</text>
+    <line x1="10" y1="80" x2="40" y2="80" class="sig"/>
+    <text x="46" y="84" class="small">GPIO signal</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- FOUR LED CHANNELS                                            -->
+  <!-- Per channel coordinates (with R_gate placed CLEAR of source/drain wire crossings): -->
+  <!--   Channel | MOSFET center | Drain wire x | Junction (x,lane_y) | R_gate (x range) | R_pulldown (x, y range) | GPIO drop x -->
+  <!--    Ch1   |    (260, 650) |    260       |   (140, 740)        |   160..210, y=740 |   140, y=800..850       |   980      -->
+  <!--    Ch2   |    (560, 650) |    560       |   (440, 780)        |   460..510, y=780 |   440, y=840..890       |  1080      -->
+  <!--    Ch3   |    (940, 650) |    940       |   (820, 820)        |   840..890, y=820 |   820, y=880..930       |  1160      -->
+  <!--    Ch4   |   (1180, 650) |   1180       |  (1060, 860)        |  1080..1130, y=860|  1060, y=920..970       |  1260      -->
+  <!-- LED strip rows: y=470-530. Drain wire from LED- (x, 500) DOWN to MOSFET drain (x, 620). MOSFET body y=620-680. Source wire from (x, 680) DOWN to GND. -->
+  <!-- ============================================================ -->
+
+  <!-- ============ CHANNEL 1 ============ -->
+  <g id="channel-1">
+    <text x="190" y="460" class="chlabel" text-anchor="middle">Channel 1</text>
+
+    <!-- +12V anode tap -->
+    <line x1="120" y1="420" x2="120" y2="500" class="pwr12"/>
+    <circle cx="120" cy="420" r="3.5" class="dot"/>
+
+    <use href="#ledstrip" x="110" y="470"/>
+
+    <!-- Drain wire LED− → MOSFET D -->
+    <line x1="260" y1="500" x2="260" y2="620" class="wire"/>
+
+    <!-- MOSFET. nmos symbol origin at gate-pin endpoint. We want drain pin endpoint at (260, 620). -->
+    <!-- Drain offset in symbol is (60, -30). So origin must be at (260-60, 620+30) = (200, 650). -->
+    <use href="#nmos" x="200" y="650"/>
+    <text x="290" y="654" class="vlabel">Q1 IRLZ34N</text>
+
+    <!-- Source wire MOSFET S → GND. Source pin endpoint at (260, 680). -->
+    <line x1="260" y1="680" x2="260" y2="1080" class="gnd"/>
+    <circle cx="260" cy="1080" r="3.5" class="dot"/>
+
+    <!-- Gate wire: MOSFET gate pin endpoint at (200, 650). Route LEFT to (140, 650), DOWN to junction (140, 740). -->
+    <line x1="200" y1="650" x2="140" y2="650" class="sig"/>
+    <line x1="140" y1="650" x2="140" y2="740" class="sig"/>
+    <circle cx="140" cy="740" r="3.5" class="dot"/>
+
+    <!-- R_gate horizontal at y=740, x=160..210 — well CLEAR of the source-wire column at x=260. -->
+    <line x1="140" y1="740" x2="160" y2="740" class="sig"/>
+    <use href="#rh" x="160" y="740"/>
+    <text x="185" y="732" class="small" text-anchor="middle">R1 330Ω</text>
+    <!-- After R1, the gate trace runs RIGHT toward GPIO25 drop at x=980. It CROSSES the source-wire column at x=260 (no dot — pure crossing). -->
+    <line x1="210" y1="740" x2="980" y2="740" class="sig"/>
+
+    <!-- R_pulldown vertical at x=140, y=800..850. Wires above and below to junction and GND. -->
+    <line x1="140" y1="740" x2="140" y2="800" class="wire"/>
+    <use href="#rv" x="140" y="800"/>
+    <text x="120" y="820" class="small" text-anchor="end">R5</text>
+    <text x="120" y="836" class="small" text-anchor="end">10kΩ</text>
+    <line x1="140" y1="850" x2="140" y2="1080" class="wire"/>
+    <circle cx="140" cy="1080" r="3.5" class="dot"/>
+  </g>
+
+  <!-- ============ CHANNEL 2 ============ -->
+  <g id="channel-2">
+    <text x="490" y="460" class="chlabel" text-anchor="middle">Channel 2</text>
+
+    <line x1="420" y1="420" x2="420" y2="500" class="pwr12"/>
+    <circle cx="420" cy="420" r="3.5" class="dot"/>
+
+    <use href="#ledstrip" x="410" y="470"/>
+
+    <line x1="560" y1="500" x2="560" y2="620" class="wire"/>
+
+    <use href="#nmos" x="500" y="650"/>
+    <text x="590" y="654" class="vlabel">Q2 IRLZ34N</text>
+
+    <line x1="560" y1="680" x2="560" y2="1080" class="gnd"/>
+    <circle cx="560" cy="1080" r="3.5" class="dot"/>
+
+    <line x1="500" y1="650" x2="440" y2="650" class="sig"/>
+    <line x1="440" y1="650" x2="440" y2="780" class="sig"/>
+    <circle cx="440" cy="780" r="3.5" class="dot"/>
+
+    <line x1="440" y1="780" x2="460" y2="780" class="sig"/>
+    <use href="#rh" x="460" y="780"/>
+    <text x="485" y="772" class="small" text-anchor="middle">R2 330Ω</text>
+    <line x1="510" y1="780" x2="1080" y2="780" class="sig"/>
+
+    <line x1="440" y1="780" x2="440" y2="840" class="wire"/>
+    <use href="#rv" x="440" y="840"/>
+    <text x="420" y="860" class="small" text-anchor="end">R6</text>
+    <text x="420" y="876" class="small" text-anchor="end">10kΩ</text>
+    <line x1="440" y1="890" x2="440" y2="1080" class="wire"/>
+    <circle cx="440" cy="1080" r="3.5" class="dot"/>
+  </g>
+
+  <!-- ============ CHANNEL 3 ============ -->
+  <g id="channel-3">
+    <text x="870" y="460" class="chlabel" text-anchor="middle">Channel 3</text>
+
+    <line x1="800" y1="420" x2="800" y2="500" class="pwr12"/>
+    <circle cx="800" cy="420" r="3.5" class="dot"/>
+
+    <use href="#ledstrip" x="790" y="470"/>
+
+    <line x1="940" y1="500" x2="940" y2="620" class="wire"/>
+
+    <use href="#nmos" x="880" y="650"/>
+    <text x="970" y="654" class="vlabel">Q3 IRLZ34N</text>
+
+    <line x1="940" y1="680" x2="940" y2="1080" class="gnd"/>
+    <circle cx="940" cy="1080" r="3.5" class="dot"/>
+
+    <line x1="880" y1="650" x2="820" y2="650" class="sig"/>
+    <line x1="820" y1="650" x2="820" y2="820" class="sig"/>
+    <circle cx="820" cy="820" r="3.5" class="dot"/>
+
+    <line x1="820" y1="820" x2="840" y2="820" class="sig"/>
+    <use href="#rh" x="840" y="820"/>
+    <text x="865" y="812" class="small" text-anchor="middle">R3 330Ω</text>
+    <line x1="890" y1="820" x2="1160" y2="820" class="sig"/>
+
+    <line x1="820" y1="820" x2="820" y2="880" class="wire"/>
+    <use href="#rv" x="820" y="880"/>
+    <text x="800" y="900" class="small" text-anchor="end">R7</text>
+    <text x="800" y="916" class="small" text-anchor="end">10kΩ</text>
+    <line x1="820" y1="930" x2="820" y2="1080" class="wire"/>
+    <circle cx="820" cy="1080" r="3.5" class="dot"/>
+  </g>
+
+  <!-- ============ CHANNEL 4 ============ -->
+  <g id="channel-4">
+    <text x="1110" y="460" class="chlabel" text-anchor="middle">Channel 4</text>
+
+    <line x1="1040" y1="420" x2="1040" y2="500" class="pwr12"/>
+    <circle cx="1040" cy="420" r="3.5" class="dot"/>
+
+    <use href="#ledstrip" x="1030" y="470"/>
+
+    <line x1="1180" y1="500" x2="1180" y2="620" class="wire"/>
+
+    <use href="#nmos" x="1120" y="650"/>
+    <text x="1210" y="654" class="vlabel">Q4 IRLZ34N</text>
+
+    <line x1="1180" y1="680" x2="1180" y2="1080" class="gnd"/>
+    <circle cx="1180" cy="1080" r="3.5" class="dot"/>
+
+    <line x1="1120" y1="650" x2="1060" y2="650" class="sig"/>
+    <line x1="1060" y1="650" x2="1060" y2="860" class="sig"/>
+    <circle cx="1060" cy="860" r="3.5" class="dot"/>
+
+    <line x1="1060" y1="860" x2="1080" y2="860" class="sig"/>
+    <use href="#rh" x="1080" y="860"/>
+    <text x="1105" y="852" class="small" text-anchor="middle">R4 330Ω</text>
+    <line x1="1130" y1="860" x2="1260" y2="860" class="sig"/>
+
+    <line x1="1060" y1="860" x2="1060" y2="920" class="wire"/>
+    <use href="#rv" x="1060" y="920"/>
+    <text x="1040" y="940" class="small" text-anchor="end">R8</text>
+    <text x="1040" y="956" class="small" text-anchor="end">10kΩ</text>
+    <line x1="1060" y1="970" x2="1060" y2="1080" class="wire"/>
+    <circle cx="1060" cy="1080" r="3.5" class="dot"/>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- GPIO ROUTING                                                 -->
+  <!-- ESP32 GPIO stub endpoints are at y=400 (translate(900,80) + (X, 320)). -->
+  <!-- Each drops vertically to its channel's lane Y.               -->
+  <!-- These cross the +12V rail at y=420 WITHOUT a junction dot.   -->
+  <!-- ============================================================ -->
+
+  <line x1="980"  y1="400" x2="980"  y2="740" class="sig"/>
+  <line x1="1080" y1="400" x2="1080" y2="780" class="sig"/>
+  <line x1="1160" y1="400" x2="1160" y2="820" class="sig"/>
+  <line x1="1260" y1="400" x2="1260" y2="860" class="sig"/>
+
+  <!-- ============ NOTES ============ -->
+  <g transform="translate(40, 1130)">
+    <rect x="0" y="0" width="1180" height="92" fill="#fafafa" stroke="#ccc"/>
+    <text x="12" y="20" class="small">• <tspan font-weight="700">Topology (each channel):</tspan> LED+ → +12V rail. LED− → MOSFET drain (D). MOSFET source (S) → GND. MOSFET gate (G) → junction node → R_gate → GPIO; junction node → R_pulldown → GND.</text>
+    <text x="12" y="38" class="small">• <tspan font-weight="700">R1–R4 (330Ω):</tspan> series gate resistors limiting inrush current into the MOSFET gate capacitance during switching transitions (~10 mA peak from a 3.3V GPIO).</text>
+    <text x="12" y="56" class="small">• <tspan font-weight="700">R5–R8 (10kΩ):</tspan> gate pull-downs holding each MOSFET off while the ESP32 is booting or resetting (GPIOs are high-impedance during this window), so the LEDs don't flash on at power-up.</text>
+    <text x="12" y="74" class="small">• <tspan font-weight="700">Wire crossings without dots:</tspan> the four GPIO signal traces cross the +12V rail, and each gate trace crosses its own (and possibly other channels') MOSFET source-drop wire. No junction dot = no electrical connection.</text>
+  </g>
+
+</svg>
