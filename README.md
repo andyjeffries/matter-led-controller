@@ -91,3 +91,45 @@ At a high level:
 * Each service exposes one or more characteristics (e.g. On, Brightness, Hue).
 * HomeKit on your iPhone communicates with those characteristics — sending and receiving values in real time.
 * When you toggle a light in the Home app, HomeKit sends a command directly to the ESP32’s HomeSpan service, which then runs the code in `update()` to physically change the LED output.
+
+## Pairing with Apple Home
+
+Once the ESP32 is flashed and has joined your Wi-Fi (you can confirm this in `make monitor` — look for `=== Wi-Fi Connected Successfully! ===`), it advertises itself on the local network as a HomeKit accessory.
+
+To add it to the Home app:
+
+1. Open the **Home** app on your iPhone or iPad.
+2. Tap **+** → **Add Accessory**.
+3. Tap **More options…** at the bottom of the screen. The device will appear under "Nearby Accessories" with the name set in `homeSpan.begin(...)` — "Andy's Matter LED Controller" by default.
+4. When prompted for the 8-digit setup code, enter:
+
+   ```
+   111-22-333
+   ```
+
+   (Type the eight digits `11122333`; the Home app auto-formats them as `XXX-XX-XXX`.)
+
+5. Acknowledge the "Uncertified Accessory" warning and step through the setup screens. The four channels appear as four separate lightbulbs, each with on/off and brightness controls — name them whatever makes sense for your room.
+
+> **Note:** despite the project name, this firmware speaks HAP (Apple's HomeKit Accessory Protocol) via HomeSpan, not Matter. From your point of view in the Home app the experience is identical — it just doesn't show up to non-Apple controllers.
+
+### Pairing via QR code
+
+HomeSpan also prints a setup QR code (and an `X-HM://…` URL) to the serial monitor at boot. Run `make monitor` after flashing, scroll up to the boot output, and either point your iPhone camera at the ASCII QR code on screen or tap the `X-HM://` URL — Home will pick the pairing code up automatically and you can skip step 4.
+
+### Changing the pairing code and accessory name
+
+If you're building your own copy of this project, change the pairing code and accessory name in [`src/main.cpp`](src/main.cpp) before flashing:
+
+```cpp
+homeSpan.setPairingCode("11122333"); // Must be exactly 8 digits
+homeSpan.setQRID("LED4CH");          // 4-char ID embedded in the QR code
+...
+homeSpan.begin(Category::Lighting, "Andy's Matter LED Controller");
+```
+
+Apple rejects "trivial" setup codes (all-same digits, simple sequences like `12345678`, `87654321`, etc.) — HomeSpan will refuse to start if you pick one of those.
+
+### Resetting / re-pairing
+
+If you remove the accessory from Home and want to add it again, you'll need to clear the stored HomeKit pairing data on the ESP32. Open `make monitor` and type `?` to see HomeSpan's built-in CLI — from there you can clear HomeKit pairings, clear Wi-Fi credentials, or factory-reset the device.
