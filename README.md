@@ -38,13 +38,23 @@ Here is a top-down view of how the components sit on a piece of perfboard, with 
 
 ## Development
 
-This project uses [PlatformIO](https://platformio.org/) via the CLI. Install it if you haven't already:
+This project uses [PlatformIO](https://platformio.org/) via the CLI. Install it if you haven't already.
+
+On macOS:
 
 ```sh
 brew install platformio
 ```
 
-Or via pip:
+On Arch-based Linux:
+
+```sh
+sudo pacman -S platformio-core platformio-core-udev python-pip
+```
+
+(`platformio-core-udev` installs the udev rules needed for serial uploads without root; `python-pip` is required by PlatformIO when it bootstraps its toolchain packages.)
+
+Or via pip on any platform:
 
 ```sh
 pip install platformio
